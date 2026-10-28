@@ -1,0 +1,24 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+backend/storage/
+*.log
+.DS_Store
+coverage/
+# Protect environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Local system files
+.DS_Store
+Thumbs.db
