@@ -9,6 +9,7 @@ const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'westbourne-test-'));
 const storeFile = path.join(tmpDir, 'contact.jsonl');
 process.env.CONTACT_STORE_PATH = storeFile;
 process.env.CORS_ORIGINS = 'http://localhost:5173';
+process.env.DATA_SOURCE = 'demo'; // never touch a real database from tests
 
 const { createApp } = await import('../../backend/src/app.js');
 

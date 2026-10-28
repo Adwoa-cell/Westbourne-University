@@ -32,3 +32,24 @@ export const contactBody = z.object({
   // Honeypot: real users never see or fill this field. Bots often do.
   website: z.string().max(200).optional().default(''),
 });
+
+const roles = ['applicant', 'student', 'admissions_officer', 'lecturer', 'administrator'];
+
+// .strict() rejects unknown keys, so a client can never smuggle in { role: 'administrator' } here.
+export const updateMeBody = z
+  .object({
+    fullName: text(1, 120).optional(),
+    phone: z.string().trim().min(5).max(30).nullable().optional(),
+  })
+  .strict()
+  .refine((v) => v.fullName !== undefined || v.phone !== undefined, { message: 'Provide fullName or phone.' });
+
+export const adminUsersQuery = z.object({
+  q: z.string().trim().max(80).optional(),
+  role: z.enum(roles).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
+
+export const userIdParams = z.object({ id: z.string().uuid() });
+export const setRoleBody = z.object({ role: z.enum(roles) }).strict();
