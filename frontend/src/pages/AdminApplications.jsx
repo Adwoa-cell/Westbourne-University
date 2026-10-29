@@ -102,19 +102,19 @@ export default function AdminApplications() {
       {!loading && !error && applications.length === 0 && <p>No applications match this filter.</p>}
       {!loading && !error && applications.length > 0 && (
         <>
-          <div className="table-wrap">
+          <div className="table-wrap admin-table-wrap">
             <table>
               <thead><tr><th>Reference</th><th>Applicant</th><th>Programme</th><th>Academic year</th><th>Status</th><th>Submitted</th><th>View</th></tr></thead>
               <tbody>
                 {applications.map((application) => (
                   <tr key={application.id}>
-                    <td>{application.referenceNumber ?? 'Draft'}</td>
-                    <td>{application.applicant.fullName}<br /><small>{application.applicant.email}</small></td>
-                    <td>{application.programme?.name ?? 'Unknown programme'}</td>
-                    <td>{application.academicYear ?? '—'}</td>
-                    <td>{statusLabel(application.status)}</td>
-                    <td>{application.submittedAt ? new Date(application.submittedAt).toLocaleDateString() : '—'}</td>
-                    <td><button className="btn btn-outline" type="button" onClick={() => openApplication(application.id)}>View</button></td>
+                    <td data-label="Reference">{application.referenceNumber ?? 'Draft'}</td>
+                    <td data-label="Applicant">{application.applicant.fullName}<br /><small>{application.applicant.email}</small></td>
+                    <td data-label="Programme">{application.programme?.name ?? 'Unknown programme'}</td>
+                    <td data-label="Academic year">{application.academicYear ?? '—'}</td>
+                    <td data-label="Status">{statusLabel(application.status)}</td>
+                    <td data-label="Submitted">{application.submittedAt ? new Date(application.submittedAt).toLocaleDateString() : '—'}</td>
+                    <td data-label="View"><button className="btn btn-outline" type="button" onClick={() => openApplication(application.id)}>View</button></td>
                   </tr>
                 ))}
               </tbody>

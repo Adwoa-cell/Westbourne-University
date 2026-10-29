@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import Logo from './Logo.jsx';
 import { nav, site } from '../config/site.js';
@@ -7,10 +7,23 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const menuButton = useRef(null);
   const { pathname } = useLocation();
   const { configured, session } = useAuth();
 
   useEffect(() => setOpen(false), [pathname]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        menuButton.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [open]);
 
   return (
     <header className="site-header">
@@ -23,13 +36,16 @@ export default function Header() {
         </Link>
 
         <button
+          ref={menuButton}
           type="button"
           className="menu-toggle"
+          aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
           aria-expanded={open}
           aria-controls="primary-nav"
           onClick={() => setOpen((v) => !v)}
         >
-          {open ? 'Close menu' : 'Menu'}
+          <span aria-hidden="true">{open ? '×' : '☰'}</span>
+          <span>{open ? 'Close' : 'Menu'}</span>
         </button>
 
         <nav

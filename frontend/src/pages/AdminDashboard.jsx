@@ -38,10 +38,12 @@ export default function AdminDashboard() {
           ].map(([title, description, href]) => (
             <article
               key={title}
+              className="card"
               style={{
-                padding: '1.5rem',
-                border: '1px solid #d5dbe5',
-                borderRadius: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '0.5rem',
               }}
             >
               <h3>{title}</h3>

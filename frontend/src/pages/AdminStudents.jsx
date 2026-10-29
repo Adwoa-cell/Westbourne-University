@@ -68,15 +68,15 @@ export default function AdminStudents() {
       {!loading && !error && students.length === 0 && <p>No student records match your search.</p>}
       {!loading && !error && students.length > 0 && (
         <>
-          <div className="table-wrap">
+          <div className="table-wrap admin-table-wrap">
             <table>
               <thead><tr><th>Student number</th><th>Name</th><th>Email</th><th>Programme</th><th>Level</th><th>Status</th><th>Record</th></tr></thead>
               <tbody>
                 {students.map((student) => (
                   <tr key={student.id}>
-                    <td>{student.studentNumber}</td><td>{student.fullName}</td><td>{student.email}</td>
-                    <td>{student.programme?.name ?? 'Unknown programme'}</td><td>{student.level}</td><td>{student.status}</td>
-                    <td><button className="btn btn-outline" type="button" onClick={() => viewStudent(student.id)}>View</button></td>
+                    <td data-label="Student number">{student.studentNumber}</td><td data-label="Name">{student.fullName}</td><td data-label="Email">{student.email}</td>
+                    <td data-label="Programme">{student.programme?.name ?? 'Unknown programme'}</td><td data-label="Level">{student.level}</td><td data-label="Status">{student.status}</td>
+                    <td data-label="Record"><button className="btn btn-outline" type="button" onClick={() => viewStudent(student.id)}>View</button></td>
                   </tr>
                 ))}
               </tbody>

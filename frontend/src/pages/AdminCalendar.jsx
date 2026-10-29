@@ -137,18 +137,18 @@ export default function AdminCalendar() {
       {loading && <p className="status" role="status">Loading events…</p>}
       {!loading && events.length === 0 && !error && <p>No calendar events have been added.</p>}
       {!loading && events.length > 0 && (
-        <div className="table-wrap">
+        <div className="table-wrap admin-table-wrap">
           <table>
             <thead><tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>Visibility</th><th>Actions</th></tr></thead>
             <tbody>
               {events.map((item) => (
                 <tr key={item.id}>
-                  <td><strong>{item.title}</strong><br />{item.description || 'No description'}</td>
-                  <td>{item.eventType}</td>
-                  <td>{item.startsOn}{item.endsOn && item.endsOn !== item.startsOn ? ` – ${item.endsOn}` : ''}</td>
-                  <td>{item.location || '—'}</td>
-                  <td>{item.isPublic ? 'Public' : 'Private'}</td>
-                  <td><button className="btn btn-outline" type="button" onClick={() => startEdit(item)}>Edit</button></td>
+                  <td data-label="Title"><strong>{item.title}</strong><br />{item.description || 'No description'}</td>
+                  <td data-label="Type">{item.eventType}</td>
+                  <td data-label="Date">{item.startsOn}{item.endsOn && item.endsOn !== item.startsOn ? ` – ${item.endsOn}` : ''}</td>
+                  <td data-label="Location">{item.location || '—'}</td>
+                  <td data-label="Visibility">{item.isPublic ? 'Public' : 'Private'}</td>
+                  <td data-label="Actions"><button className="btn btn-outline" type="button" onClick={() => startEdit(item)}>Edit</button></td>
                 </tr>
               ))}
             </tbody>

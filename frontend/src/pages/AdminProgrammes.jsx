@@ -216,16 +216,16 @@ export default function AdminProgrammes() {
         <>
           <h2>Academic Programmes ({programmes.length})</h2>
           {programmes.length === 0 ? <p>No programmes found in the database.</p> : (
-            <div className="table-wrap">
+            <div className="table-wrap admin-table-wrap">
               <table>
                 <thead><tr><th>Code</th><th>Programme</th><th>Faculty</th><th>Qualification</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
                   {programmes.map((programme) => (
                     <tr key={programme.id}>
-                      <td>{programme.code}</td><td>{programme.name}</td><td>{programme.facultyName ?? 'Unassigned'}</td>
-                      <td>{programme.qualification}</td><td>{programme.durationMonths} months</td>
-                      <td>{programme.isActive ? 'Active' : 'Inactive'}</td>
-                      <td>
+                      <td data-label="Code">{programme.code}</td><td data-label="Programme">{programme.name}</td><td data-label="Faculty">{programme.facultyName ?? 'Unassigned'}</td>
+                      <td data-label="Qualification">{programme.qualification}</td><td data-label="Duration">{programme.durationMonths} months</td>
+                      <td data-label="Status">{programme.isActive ? 'Active' : 'Inactive'}</td>
+                      <td data-label="Actions">
                         <div className="button-row">
                           <button className="btn btn-outline" type="button" onClick={() => startEdit(programme)}>Edit</button>
                           <button className="btn btn-outline" type="button" disabled={changingStatusId === programme.id} onClick={() => toggleActive(programme)}>

@@ -71,6 +71,8 @@ export default function Home() {
             <img
               src="/images/students.jpg"
               alt="University students studying together on campus"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div className="wu-about-copy">
