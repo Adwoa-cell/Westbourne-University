@@ -53,3 +53,97 @@ export const adminUsersQuery = z.object({
 
 export const userIdParams = z.object({ id: z.string().uuid() });
 export const setRoleBody = z.object({ role: z.enum(roles) }).strict();
+
+const programmeFields = {
+  code: z.string().trim().regex(/^[A-Z0-9-]{3,20}$/, 'Use 3–20 uppercase letters, numbers or hyphens.'),
+  name: text(1, 200),
+  facultyId: z.string().uuid(),
+  qualification: z.enum(['Certificate', 'Diploma', 'Bachelor', 'Master']),
+  durationMonths: z.coerce.number().int().min(1).max(120),
+  studyMode: text(1, 100),
+  description: z.string().trim().max(5000),
+  entryRequirements: z.string().trim().max(5000),
+  isFeatured: z.boolean(),
+  isActive: z.boolean(),
+};
+
+export const createProgrammeBody = z.object(programmeFields).strict();
+
+export const updateProgrammeBody = z
+  .object(programmeFields)
+  .partial()
+  .strict()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'Provide at least one programme field to update.',
+  });
+
+export const programmeIdParams = z.object({
+  id: z.string().uuid(),
+});
+
+export const programmeStatusBody = z.object({
+  isActive: z.boolean(),
+}).strict();
+
+export const applicationQuery = z.object({
+  status: z.enum(['draft', 'submitted', 'under_review', 'additional_information_required', 'accepted', 'rejected']).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
+
+export const applicationIdParams = z.object({ id: z.string().uuid() });
+
+export const applicationStatusBody = z.object({
+  status: z.enum(['under_review', 'additional_information_required', 'accepted', 'rejected']),
+  infoRequest: z.string().trim().max(2000).optional(),
+}).strict().refine(
+  (value) => value.status !== 'additional_information_required' || Boolean(value.infoRequest),
+  { message: 'Explain what additional information is required.', path: ['infoRequest'] },
+);
+
+export const studentQuery = z.object({
+  q: z.string().trim().max(80).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
+
+export const studentIdParams = z.object({ id: z.string().uuid() });
+
+const eventTypes = ['semester', 'registration', 'examination', 'holiday', 'event', 'deadline'];
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === value;
+}, 'Enter a valid calendar date.');
+
+const calendarEventFields = {
+  title: text(3, 200),
+  description: z.string().trim().max(4000).default(''),
+  location: z.string().trim().max(200).default(''),
+  eventType: z.enum(eventTypes),
+  startsOn: isoDate,
+  endsOn: isoDate.nullable().optional(),
+  academicYearId: z.string().uuid().nullable().optional(),
+  semesterId: z.string().uuid().nullable().optional(),
+  isPublic: z.boolean().default(true),
+};
+
+const eventDateRange = (value) => !value.endsOn || !value.startsOn || value.endsOn >= value.startsOn;
+
+export const createCalendarEventBody = z.object(calendarEventFields).strict().refine(eventDateRange, {
+  message: 'The end date must be on or after the start date.',
+  path: ['endsOn'],
+});
+
+export const updateCalendarEventBody = z.object({
+  ...calendarEventFields,
+  description: z.string().trim().max(4000).optional(),
+  location: z.string().trim().max(200).optional(),
+  isPublic: z.boolean().optional(),
+}).partial().strict().refine((value) => Object.keys(value).length > 0, {
+  message: 'Provide at least one event field to update.',
+}).refine(eventDateRange, {
+  message: 'The end date must be on or after the start date.',
+  path: ['endsOn'],
+});
+
+export const calendarEventIdParams = z.object({ id: z.string().uuid() });

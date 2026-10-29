@@ -6,6 +6,7 @@ import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
+// Public university pages
 import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
 import Programmes from './pages/Programmes.jsx';
@@ -15,14 +16,21 @@ import News from './pages/News.jsx';
 import Contact from './pages/Contact.jsx';
 import NotFound from './pages/NotFound.jsx';
 
-// Phase 2 authentication pages
+// Authentication pages
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 import AuthCallback from './pages/AuthCallback.jsx';
 import Account from './pages/Account.jsx';
+
+// Administrator pages
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import AdminProgrammes from './pages/AdminProgrammes.jsx';
+import AdminApplications from './pages/AdminApplications.jsx';
+import AdminStudents from './pages/AdminStudents.jsx';
+import AdminCalendar from './pages/AdminCalendar.jsx';
+
 function ScrollToTop() {
   const { pathname } = useLocation();
 
@@ -46,7 +54,7 @@ export default function App() {
 
       <main id="main">
         <Routes>
-          {/* Existing Phase 1 university pages */}
+          {/* Public university pages */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/programmes" element={<Programmes />} />
@@ -55,7 +63,7 @@ export default function App() {
           <Route path="/news" element={<News />} />
           <Route path="/contact" element={<Contact />} />
 
-          {/* Phase 2 authentication pages */}
+          {/* Authentication pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -72,15 +80,53 @@ export default function App() {
             }
           />
 
-{/* Administrator dashboard */}
-<Route
-  path="/admin"
-  element={
-    <ProtectedRoute allowedRoles={['administrator']}>
-      <AdminDashboard />
-    </ProtectedRoute>
-  }
-/>
+          {/* Administrator dashboard */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['administrator']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Administrator Programmes Management */}
+          <Route
+            path="/admin/programmes"
+            element={
+              <ProtectedRoute allowedRoles={['administrator']}>
+                <AdminProgrammes />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/applications"
+            element={
+              <ProtectedRoute allowedRoles={['administrator']}>
+                <AdminApplications />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/students"
+            element={
+              <ProtectedRoute allowedRoles={['administrator']}>
+                <AdminStudents />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/calendar"
+            element={
+              <ProtectedRoute allowedRoles={['administrator']}>
+                <AdminCalendar />
+              </ProtectedRoute>
+            }
+          />
+
           {/* 404 page */}
           <Route path="*" element={<NotFound />} />
         </Routes>

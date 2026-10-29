@@ -40,10 +40,9 @@ In development, Vite (port 5173) forwards `/api` to Express (port 4000), so the 
 - The Supabase service-role key will live only in the backend environment (Phase 2).
 - The backend never trusts a role or user ID sent by the browser; it will derive identity from a verified Supabase token.
 
-## Current state (Phase 1)
+## Current state
 
-Public pages read FICTIONAL demo data from `backend/src/data/demoData.js` through real API endpoints. In Phase 2 the controllers switch to Supabase queries and the response shapes stay the same.
-The contact form is stored in `backend/storage/contact-messages.jsonl` (gitignored) until the database exists.
+Public pages can use demo data or Supabase-backed repositories, depending on backend configuration. The authenticated administrator screens use Supabase through the Express API and the signed-in user's database client. The contact form uses the configured repository.
 
 ## API endpoints in Phase 1
 
@@ -60,7 +59,26 @@ The contact form is stored in `backend/storage/contact-messages.jsonl` (gitignor
 
 Errors always look like `{ "error": { "code": "VALIDATION_ERROR", "message": "...", "fields": { ... } } }`.
 
-## Phase 1 security measures and limits
+## Administrator management
 
-Done: Helmet security headers, CORS allow-list, request size limit (10 KB), global and contact rate limits, zod validation, generic 500 errors, no secrets in code, `.env` ignored by Git.
-Not yet: authentication, authorisation, database policies, audit logs, file uploads. These arrive in later phases. Nothing here has been penetration tested.
+The `/admin` React routes require a verified signed-in user whose database profile role is `administrator`. Every `/api/v1/admin/*` endpoint applies the same authentication and role middleware. Administrative queries use the caller's Supabase JWT, so the existing RLS policies remain active; the browser never receives a service-role key.
+
+| Method | Path | Notes |
+|--------|------|-------|
+| GET | /api/v1/admin/faculties | Returns faculty UUIDs for programme assignment |
+| GET, POST | /api/v1/admin/programmes | List and create programmes |
+| PATCH | /api/v1/admin/programmes/:id | Edit programme fields |
+| PATCH | /api/v1/admin/programmes/:id/status | Activate or deactivate a programme |
+| GET | /api/v1/admin/applications | Paginated list, optionally filtered by status |
+| GET | /api/v1/admin/applications/:id | View application, status history and documents through short-lived private-storage links |
+| PATCH | /api/v1/admin/applications/:id/status | Apply an allowed admissions workflow transition |
+| GET | /api/v1/admin/students | Paginated student listing, optionally searched by student number |
+| GET | /api/v1/admin/students/:id | View a student record |
+| GET, POST | /api/v1/admin/calendar-events | List and create calendar events |
+| PATCH | /api/v1/admin/calendar-events/:id | Edit a calendar event |
+
+These features use the tables and administrator RLS rules already defined in migrations `001_core_schema.sql` and `003_rls_policies.sql`; they do not require a new migration. Application status transitions also pass through the database workflow guard in `002_functions_triggers.sql`.
+
+## Security measures and limits
+
+Implemented: Helmet security headers, CORS allow-list, request size limit (10 KB), rate limits, Zod validation, generic 500 errors, verified Supabase authentication, database-backed roles, administrator authorization, RLS policies and audit triggers. Application documents use private storage and are not directly exposed as public URLs. Nothing here has been penetration tested.

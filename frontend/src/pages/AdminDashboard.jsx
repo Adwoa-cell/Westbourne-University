@@ -31,11 +31,11 @@ export default function AdminDashboard() {
           }}
         >
           {[
-            ['Applications', 'Review student applications'],
-            ['Students', 'Manage student records'],
-            ['Programmes', 'Manage academic programmes'],
-            ['Calendar', 'Manage university events'],
-          ].map(([title, description]) => (
+            ['Applications', 'Review student applications', '/admin/applications'],
+            ['Students', 'View student records', '/admin/students'],
+            ['Programmes', 'Manage academic programmes', '/admin/programmes'],
+            ['Calendar', 'Manage university events', '/admin/calendar'],
+          ].map(([title, description, href]) => (
             <article
               key={title}
               style={{
@@ -46,9 +46,7 @@ export default function AdminDashboard() {
             >
               <h3>{title}</h3>
               <p>{description}</p>
-              <p style={{ color: '#64748b' }}>
-                Management tools coming soon
-              </p>
+              <Link to={href}>Open {title.toLowerCase()} management</Link>
             </article>
           ))}
         </div>
