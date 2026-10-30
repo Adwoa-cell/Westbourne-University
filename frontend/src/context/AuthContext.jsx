@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js';
 
 export const MIN_PASSWORD_LENGTH = 12;
 const AuthContext = createContext(null);
+const redirectUrl = (path) => `${window.location.origin}${import.meta.env.BASE_URL}${path}`;
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
@@ -56,7 +57,7 @@ export function AuthProvider({ children }) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName }, emailRedirectTo: `${window.location.origin}/auth/callback` },
+          options: { data: { full_name: fullName }, emailRedirectTo: redirectUrl('auth/callback') },
         });
         if (error) throw error;
       },
@@ -71,12 +72,12 @@ export function AuthProvider({ children }) {
         const { error } = await supabase.auth.resend({
           type: 'signup',
           email,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+          options: { emailRedirectTo: redirectUrl('auth/callback') },
         });
         if (error) throw error;
       },
       async requestPasswordReset(email) {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl('reset-password') });
         if (error) throw error;
       },
       async updatePassword(password) {
