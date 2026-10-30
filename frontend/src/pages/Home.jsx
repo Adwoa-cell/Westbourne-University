@@ -25,7 +25,10 @@ export default function Home() {
 
   return (
     <>
-      <section className="wu-hero">
+      <section
+        className="wu-hero"
+        style={{ '--wu-campus-image': `url("${import.meta.env.BASE_URL}images/campus.jpg")` }}
+      >
         <div className="container wu-hero-content">
           <div className="wu-hero-copy">
             <p className="wu-eyebrow">WELCOME TO WESTBOURNE UNIVERSITY</p>
@@ -69,7 +72,7 @@ export default function Home() {
         <div className="container wu-about-grid">
           <div className="wu-about-image">
             <img
-              src="/images/students.jpg"
+              src={`${import.meta.env.BASE_URL}images/students.jpg`}
               alt="University students studying together on campus"
               loading="lazy"
               decoding="async"
