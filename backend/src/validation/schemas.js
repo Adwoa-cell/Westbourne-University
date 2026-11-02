@@ -109,6 +109,30 @@ export const studentQuery = z.object({
 
 export const studentIdParams = z.object({ id: z.string().uuid() });
 
+export const cutoffPointsAdminQuery = z.object({
+  academicYearId: z.string().uuid().optional(),
+});
+
+export const cutoffPointIdParams = z.object({ id: z.string().uuid() });
+
+const cutoffPointFields = {
+  programmeId: z.string().uuid(),
+  academicYearId: z.string().uuid(),
+  points: z.number().int().min(0).max(100).nullable(),
+  requiredSubjects: z.array(text(1, 100)).max(20),
+  additionalRequirements: z.string().trim().max(4000),
+};
+
+export const createCutoffPointBody = z.object(cutoffPointFields).strict();
+
+export const updateCutoffPointBody = z.object({
+  points: cutoffPointFields.points.optional(),
+  requiredSubjects: cutoffPointFields.requiredSubjects.optional(),
+  additionalRequirements: cutoffPointFields.additionalRequirements.optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, {
+  message: 'Provide at least one cut-off point field to update.',
+});
+
 const eventTypes = ['semester', 'registration', 'examination', 'holiday', 'event', 'deadline'];
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
   const date = new Date(`${value}T00:00:00.000Z`);

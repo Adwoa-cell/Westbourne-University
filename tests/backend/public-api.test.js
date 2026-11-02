@@ -84,6 +84,7 @@ test('invalid query parameters are rejected with 400', async () => {
 test('cut-off points include the academic year and required subjects', async () => {
   const { body } = await getJson('/api/v1/cutoff-points?q=computer');
   assert.equal(body.academicYear, '2026/2027');
+  assert.deepEqual(body.academicYears, [{ label: '2026/2027', isCurrent: true }]);
   assert.equal(body.data[0].programmeCode, 'BSC-CS');
   assert.ok(body.data[0].requiredSubjects.includes('Mathematics'));
 });

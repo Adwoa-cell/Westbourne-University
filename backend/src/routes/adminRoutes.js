@@ -20,6 +20,10 @@ import {
   createCalendarEventBody,
   updateCalendarEventBody,
   calendarEventIdParams,
+  cutoffPointsAdminQuery,
+  cutoffPointIdParams,
+  createCutoffPointBody,
+  updateCutoffPointBody,
 } from '../validation/schemas.js';
 
 import * as c from '../controllers/adminController.js';
@@ -72,6 +76,23 @@ export const createAdminRoutes = (authenticate) => {
   );
 
   router.get('/faculties', wrap(c.listAdminFaculties));
+
+  router.get(
+    '/cut-off-points',
+    validate(cutoffPointsAdminQuery),
+    wrap(c.listAdminCutoffPoints),
+  );
+  router.post(
+    '/cut-off-points',
+    validate(createCutoffPointBody, 'body'),
+    wrap(c.createAdminCutoffPoint),
+  );
+  router.patch(
+    '/cut-off-points/:id',
+    validate(cutoffPointIdParams, 'params'),
+    validate(updateCutoffPointBody, 'body'),
+    wrap(c.updateAdminCutoffPoint),
+  );
 
   router.get(
     '/applications',

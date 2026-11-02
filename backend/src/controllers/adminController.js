@@ -213,6 +213,131 @@ export const listAdminFaculties = async (req, res, next) => {
   return res.json({ data });
 };
 
+const cutoffPointSelect = `
+  id,programme_id,academic_year_id,points,required_subjects,additional_requirements,updated_at,
+  programmes!cutoff_points_programme_id_fkey(id,code,name,qualification,is_active),
+  academic_years!cutoff_points_academic_year_id_fkey(id,label)
+`;
+
+const presentCutoffPoint = (row) => ({
+  id: row.id,
+  programmeId: row.programme_id,
+  academicYearId: row.academic_year_id,
+  programme: row.programmes ? {
+    id: row.programmes.id,
+    code: row.programmes.code,
+    name: row.programmes.name,
+    qualification: row.programmes.qualification,
+    isActive: row.programmes.is_active,
+  } : null,
+  academicYear: row.academic_years ? {
+    id: row.academic_years.id,
+    label: row.academic_years.label,
+  } : null,
+  points: row.points,
+  requiredSubjects: row.required_subjects,
+  additionalRequirements: row.additional_requirements,
+  updatedAt: row.updated_at,
+});
+
+const cutoffPointError = (res, next, error) => {
+  if (error.code === '23503') {
+    return res.status(400).json({
+      error: { code: 'INVALID_CUTOFF_REFERENCE', message: 'The selected programme or academic year does not exist.' },
+    });
+  }
+  if (error.code === '23505') {
+    return res.status(409).json({
+      error: { code: 'DUPLICATE_CUTOFF_POINT', message: 'This programme already has cut-off points for that academic year.' },
+    });
+  }
+  if (error.code === '42501') {
+    return res.status(403).json({
+      error: { code: 'FORBIDDEN', message: 'You do not have permission to manage cut-off points.' },
+    });
+  }
+  return next(error);
+};
+
+export const listAdminCutoffPoints = async (req, res, next) => {
+  const db = req.auth.db;
+  const [yearsResult, programmesResult] = await Promise.all([
+    db.from('academic_years').select('id,label,is_current').order('label', { ascending: false }),
+    db.from('programmes').select('id,code,name,qualification').eq('is_active', true).order('name'),
+  ]);
+  if (yearsResult.error) return next(yearsResult.error);
+  if (programmesResult.error) return next(programmesResult.error);
+
+  const academicYears = yearsResult.data;
+  const selectedAcademicYearId = req.validated.query.academicYearId
+    ?? academicYears.find((year) => year.is_current)?.id
+    ?? academicYears[0]?.id
+    ?? null;
+
+  if (req.validated.query.academicYearId && !academicYears.some((year) => year.id === selectedAcademicYearId)) {
+    return res.status(400).json({
+      error: { code: 'INVALID_ACADEMIC_YEAR', message: 'The selected academic year does not exist.' },
+    });
+  }
+
+  let records = [];
+  if (selectedAcademicYearId) {
+    const result = await db
+      .from('cutoff_points')
+      .select(cutoffPointSelect)
+      .eq('academic_year_id', selectedAcademicYearId);
+    if (result.error) return next(result.error);
+    records = result.data.map(presentCutoffPoint);
+  }
+
+  return res.json({
+    data: records,
+    academicYears,
+    programmes: programmesResult.data,
+    selectedAcademicYearId,
+  });
+};
+
+export const createAdminCutoffPoint = async (req, res, next) => {
+  const body = req.validated.body;
+  const { data, error } = await req.auth.db
+    .from('cutoff_points')
+    .insert({
+      programme_id: body.programmeId,
+      academic_year_id: body.academicYearId,
+      points: body.points,
+      required_subjects: body.requiredSubjects,
+      additional_requirements: body.additionalRequirements,
+      updated_by: req.auth.user.id,
+    })
+    .select(cutoffPointSelect)
+    .single();
+
+  if (error) return cutoffPointError(res, next, error);
+  return res.status(201).json({ data: presentCutoffPoint(data) });
+};
+
+export const updateAdminCutoffPoint = async (req, res, next) => {
+  const values = {
+    ...(req.validated.body.points !== undefined ? { points: req.validated.body.points } : {}),
+    ...(req.validated.body.requiredSubjects !== undefined ? { required_subjects: req.validated.body.requiredSubjects } : {}),
+    ...(req.validated.body.additionalRequirements !== undefined ? { additional_requirements: req.validated.body.additionalRequirements } : {}),
+    updated_by: req.auth.user.id,
+  };
+  const { data, error } = await req.auth.db
+    .from('cutoff_points')
+    .update(values)
+    .eq('id', req.validated.params.id)
+    .select(cutoffPointSelect)
+    .maybeSingle();
+
+  if (error) return cutoffPointError(res, next, error);
+  if (!data) {
+    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Cut-off point record not found.' } });
+  }
+  return res.json({ data: presentCutoffPoint(data) });
+};
+
 const presentApplication = (application) => ({
   id: application.id,
   referenceNumber: application.reference_number,

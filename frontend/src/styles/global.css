@@ -213,7 +213,7 @@ tbody th { font-weight: 600; color: var(--navy-900); }
       rgba(5, 23, 51, 0.77) 35%,
       rgba(5, 23, 51, 0.18) 78%
     ),
-    url('/images/campus.jpg') center / cover no-repeat;
+    var(--wu-campus-image) center / cover no-repeat;
 }
 
 .wu-hero-content {

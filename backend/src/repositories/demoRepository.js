@@ -25,7 +25,7 @@ export const demoRepository = {
           additional: c.additional,
         };
       });
-    return { academicYear: label, rows };
+    return { academicYear: label, academicYears: [{ label: academicYear, isCurrent: true }], rows };
   },
   async announcements() {
     return announcements;

@@ -30,6 +30,7 @@ import AdminProgrammes from './pages/AdminProgrammes.jsx';
 import AdminApplications from './pages/AdminApplications.jsx';
 import AdminStudents from './pages/AdminStudents.jsx';
 import AdminCalendar from './pages/AdminCalendar.jsx';
+import AdminCutOffPoints from './pages/AdminCutOffPoints.jsx';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -123,6 +124,15 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['administrator']}>
                 <AdminCalendar />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/cut-off-points"
+            element={
+              <ProtectedRoute allowedRoles={['administrator']}>
+                <AdminCutOffPoints />
               </ProtectedRoute>
             }
           />

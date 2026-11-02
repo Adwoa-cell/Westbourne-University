@@ -34,6 +34,7 @@ export default function AdminDashboard() {
             ['Applications', 'Review student applications', '/admin/applications'],
             ['Students', 'View student records', '/admin/students'],
             ['Programmes', 'Manage academic programmes', '/admin/programmes'],
+            ['Cut-off Points', 'Manage admissions cut-off points', '/admin/cut-off-points'],
             ['Calendar', 'Manage university events', '/admin/calendar'],
           ].map(([title, description, href]) => (
             <article

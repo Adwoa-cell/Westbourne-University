@@ -50,15 +50,20 @@ export const supabaseRepository = {
 
   async cutoffPoints(year) {
     const label = year ?? (await currentYearLabel());
-    const rows = check(
-      await getPublicClient()
+    const client = getPublicClient();
+    const [rows, years] = await Promise.all([
+      client
         .from('cutoff_points')
         .select('points,required_subjects,additional_requirements,programmes(code,name,qualification,faculties(code)),academic_years!inner(label)')
         .eq('academic_years.label', label),
-    );
+      client.from('academic_years').select('label,is_current').order('label', { ascending: false }),
+    ]);
+    const cutoffRows = check(rows);
+    const academicYears = check(years);
     return {
       academicYear: label,
-      rows: rows
+      academicYears: academicYears.map((item) => ({ label: item.label, isCurrent: item.is_current })),
+      rows: cutoffRows
         .map((c) => ({
           programmeCode: c.programmes.code,
           programmeName: c.programmes.name,

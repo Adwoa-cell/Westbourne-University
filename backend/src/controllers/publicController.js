@@ -27,7 +27,11 @@ export const listCutoffPoints = async (req, res) => {
   const rows = result.rows.filter(
     (row) => !q || matches(row.programmeName, q) || matches(row.programmeCode, q) || row.requiredSubjects.some((s) => matches(s, q)),
   );
-  res.json({ ...paginate(rows, page, pageSize), academicYear: result.academicYear });
+  res.json({
+    ...paginate(rows, page, pageSize),
+    academicYear: result.academicYear,
+    academicYears: result.academicYears,
+  });
 };
 
 export const listAnnouncements = async (req, res) => {

@@ -12,6 +12,8 @@ const programmeId = '33333333-3333-4333-8333-333333333333';
 const applicationId = '44444444-4444-4444-8444-444444444444';
 const studentId = '55555555-5555-4555-8555-555555555555';
 const eventId = '66666666-6666-4666-8666-666666666666';
+const academicYearId = '77777777-7777-4777-8777-777777777777';
+const cutoffPointId = '88888888-8888-4888-8888-888888888888';
 
 function fakeDb(results = {}) {
   const calls = [];
@@ -51,6 +53,10 @@ function fakeDb(results = {}) {
 
 const adminDb = fakeDb({
   faculties: { data: [{ id: facultyId, code: 'sci', name: 'Science' }], error: null },
+  academic_years: {
+    data: [{ id: academicYearId, label: '2026/2027', is_current: true }],
+    error: null,
+  },
   programmes: {
     data: [{
       id: programmeId,
@@ -132,6 +138,26 @@ const adminDb = fakeDb({
     }],
     error: null,
   },
+  cutoff_points: {
+    data: [{
+      id: cutoffPointId,
+      programme_id: programmeId,
+      academic_year_id: academicYearId,
+      points: 28,
+      required_subjects: ['Mathematics', 'English'],
+      additional_requirements: 'Minimum credit in Mathematics.',
+      updated_at: '2026-01-01T00:00:00.000Z',
+      programmes: {
+        id: programmeId,
+        code: 'BSC-CS',
+        name: 'Computer Science',
+        qualification: 'Bachelor',
+        is_active: true,
+      },
+      academic_years: { id: academicYearId, label: '2026/2027' },
+    }],
+    error: null,
+  },
 });
 
 const sessions = {
@@ -176,6 +202,9 @@ test('all administrator management endpoints enforce administrator role', async 
     ['/api/v1/admin/students', 'GET'],
     [`/api/v1/admin/students/${studentId}`, 'GET'],
     ['/api/v1/admin/calendar-events', 'GET'],
+    ['/api/v1/admin/cut-off-points', 'GET'],
+    ['/api/v1/admin/cut-off-points', 'POST'],
+    [`/api/v1/admin/cut-off-points/${cutoffPointId}`, 'PATCH'],
   ];
   for (const [path, method] of paths) {
     const anonymous = await request(method, path, { token: '' });
@@ -268,4 +297,71 @@ test('calendar event creation validates dates and returns persisted event data',
     body: { endsOn: '2026-09-02' },
   });
   assert.equal(updated.response.status, 200);
+});
+
+test('cut-off point management lists joined data and creates or updates records', async () => {
+  const listed = await request('GET', `/api/v1/admin/cut-off-points?academicYearId=${academicYearId}`);
+  assert.equal(listed.response.status, 200);
+  assert.equal(listed.payload.selectedAcademicYearId, academicYearId);
+  assert.equal(listed.payload.data[0].programme.name, 'Computer Science');
+  assert.equal(listed.payload.data[0].academicYear.label, '2026/2027');
+  assert.equal(listed.payload.programmes[0].id, programmeId);
+
+  const createBody = {
+    programmeId,
+    academicYearId,
+    points: 30,
+    requiredSubjects: ['Mathematics', 'Physics'],
+    additionalRequirements: 'Interview required.',
+  };
+  const created = await request('POST', '/api/v1/admin/cut-off-points', { body: createBody });
+  assert.equal(created.response.status, 201);
+  const insert = adminDb.calls.find((call) => call.table === 'cutoff_points' && call.method === 'insert');
+  assert.deepEqual(insert.args[0], {
+    programme_id: programmeId,
+    academic_year_id: academicYearId,
+    points: 30,
+    required_subjects: ['Mathematics', 'Physics'],
+    additional_requirements: 'Interview required.',
+    updated_by: adminId,
+  });
+
+  const updated = await request('PATCH', `/api/v1/admin/cut-off-points/${cutoffPointId}`, {
+    body: { points: null, requiredSubjects: [], additionalRequirements: 'No points test applies.' },
+  });
+  assert.equal(updated.response.status, 200);
+  const update = adminDb.calls.find((call) => call.table === 'cutoff_points' && call.method === 'update');
+  assert.deepEqual(update.args[0], {
+    points: null,
+    required_subjects: [],
+    additional_requirements: 'No points test applies.',
+    updated_by: adminId,
+  });
+});
+
+test('cut-off point management validates IDs, point ranges and subject entries', async () => {
+  const invalidYear = await request('GET', '/api/v1/admin/cut-off-points?academicYearId=not-a-uuid');
+  assert.equal(invalidYear.response.status, 400);
+
+  const invalidPoints = await request('POST', '/api/v1/admin/cut-off-points', {
+    body: {
+      programmeId,
+      academicYearId,
+      points: 101,
+      requiredSubjects: [],
+      additionalRequirements: '',
+    },
+  });
+  assert.equal(invalidPoints.response.status, 400);
+
+  const invalidSubject = await request('POST', '/api/v1/admin/cut-off-points', {
+    body: {
+      programmeId,
+      academicYearId,
+      points: null,
+      requiredSubjects: ['  '],
+      additionalRequirements: '',
+    },
+  });
+  assert.equal(invalidSubject.response.status, 400);
 });

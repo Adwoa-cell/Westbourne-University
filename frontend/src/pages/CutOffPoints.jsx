@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DataState from '../components/DataState.jsx';
 import PageHeader from '../components/PageHeader.jsx';
 import { academicYears } from '../config/site.js';
@@ -12,6 +12,16 @@ export default function CutOffPoints() {
   const [year, setYear] = useState(academicYears[0]);
   const debounced = useDebounced(q);
   const state = useFetch('/cutoff-points', { q: debounced, academicYear: year, pageSize: 50 });
+  const availableYears = useMemo(
+    () => state.data?.academicYears?.length ? state.data.academicYears : academicYears.map((label) => ({ label })),
+    [state.data?.academicYears],
+  );
+
+  useEffect(() => {
+    if (state.data?.academicYear && !availableYears.some((item) => item.label === year)) {
+      setYear(state.data.academicYear);
+    }
+  }, [availableYears, state.data, year]);
 
   return (
     <>
@@ -26,7 +36,9 @@ export default function CutOffPoints() {
             <div className="field">
               <label htmlFor="year">Academic year</label>
               <select id="year" value={year} onChange={(e) => setYear(e.target.value)}>
-                {academicYears.map((y) => (<option key={y} value={y}>{y}</option>))}
+                {availableYears.map((item) => (
+                  <option key={item.label} value={item.label}>{item.label}{item.isCurrent ? ' (Current)' : ''}</option>
+                ))}
               </select>
             </div>
           </form>
@@ -62,7 +74,7 @@ export default function CutOffPoints() {
               )
             }
           </DataState>
-          <p className="meta note">Authorised administrators will be able to update these figures from the staff dashboard in a later phase.</p>
+          <p className="meta note">Cut-off point information is maintained by authorised university administrators.</p>
         </div>
       </section>
     </>
