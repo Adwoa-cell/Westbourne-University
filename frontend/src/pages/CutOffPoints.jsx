@@ -10,7 +10,7 @@ export default function CutOffPoints() {
   usePageTitle('Cut-off points');
   const [q, setQ] = useState('');
   const [year, setYear] = useState(academicYears[0]);
-  const debouncedQ = useDebounced(q);
+  const debounced = useDebounced(q);
   const state = useFetch('/cutoff-points', { q: debounced, academicYear: year, pageSize: 50 });
 
   return (
