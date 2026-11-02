@@ -11,7 +11,7 @@ export default function CutOffPoints() {
   const [q, setQ] = useState('');
   const [year, setYear] = useState(academicYears[0]);
   const debouncedQ = useDebounced(q);
-  const state = useFetch('/cut-off-points', { q: debouncedQ, academicYear: year, pageSize: 50 });
+  const state = useFetch('/cutoff-points', { q: debounced, academicYear: year, pageSize: 50 });
 
   return (
     <>
